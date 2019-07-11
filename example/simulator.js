@@ -1,15 +1,22 @@
 var ZwackBLE = require('../lib/zwack-ble-sensor');
 const readline = require('readline');
+const http = require('http');
+
+var argv = require('minimist')(process.argv.slice(2));
+var metricsServerUrl = argv.server;
+if (metricsServerUrl === undefined){
+  console.error("Error: server parameter is required");
+  process.exit(1);
+}
 
 // default parameters
 var cadence = 90;
 var power = 250;
-var randomness = 5;
+var randomness = 0;
 var sensorName = 'Zwack';
 
-var incr = 10;
 var stroke_count = 0;
-var notificationInterval = 1000;
+var notificationInterval = 700;
 var watts = power;
 
 readline.emitKeypressEvents(process.stdin);
@@ -26,45 +33,6 @@ process.stdin.on('keypress', (str, key) => {
     process.exit(); // eslint-disable-line no-process-exit
   } else if (key.name === 'l') {
     listKeys();
-  } else {
-    if( key.shift ) {
-      factor = incr;
-    }
-    else {
-      factor = -incr;
-    }
-
-    switch(key.name) {
-      case 'c':
-        cadence += factor; break;
-        if( cadence < 0 ) {
-          cadence = 0;
-        }
-        if( cadence > 200 ) {
-          cadence = 200;
-        }
-      case 'p':
-        power += factor; break;
-        if( power < 0 ) {
-          power = 0;
-        }
-        if( power > 2500 ) {
-          power = 2500;
-        }
-      case 'r':
-        randomness += factor; break;
-        if( randomness < 0 ) {
-          randomness = 0;
-        }
-      case 'i':
-        incr += Math.abs(factor)/factor; break;
-        if( incr < 1 ) {
-          incr = 1;
-        }
-      defaut:
-        listKeys();
-    }
-    listParams();
   }
 });
 
@@ -100,32 +68,37 @@ var notifyCadenceCSP = function() {
 };
 
 
-function listParams() {
-  console.log(`\nBLE Sensor parameters:`);
-  console.log(`\nCycling:`)
-  console.log(`    Cadence: ${cadence} RPM`);
-  console.log(`    Power: ${power} W`);
-
-  console.log(`\nRandomness: ${randomness}`);
-  console.log(`Increment: ${incr}`);
-  console.log('\n');
-}
-
 function listKeys() {
   console.log(`\nList of Available Keys`);
-  console.log('c/C - Decrease/Increase cycling cadence');
-  console.log('p/P - Decrease/Increase cycling power');
-
-  console.log('\nr/R - Decrease/Increase parameter variability');
-  console.log('i/I - Decrease/Increase parameter increment');
   console.log('x/q - Exit');
   console.log();
+}
+
+function pollMetricsFromServer() {
+  http.get(metricsServerUrl, function(res){
+    var body = '';
+
+    res.on('data', function(chunk){
+        body += chunk;
+    });
+
+    res.on('end', function(){
+        var response = JSON.parse(body);
+        console.log("Got a response:", "power:", response.power, "cadence:", response.cadence);
+        cadence = response.cadence;
+        power = response.power;
+    });
+  }).on('error', function(e){
+    console.log("Got an error: ", e);
+  });
+
+  setTimeout(pollMetricsFromServer, notificationInterval);
 }
 
 // Main
 console.log(`[ZWack] Faking test data for sensor: ${sensorName}`);
 
 listKeys();
-listParams();
 notifyPowerCSP();
 notifyCadenceCSP();
+pollMetricsFromServer();
