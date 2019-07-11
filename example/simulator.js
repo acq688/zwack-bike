@@ -63,7 +63,7 @@ var notifyCadenceCSP = function() {
   catch( e ) {
     console.error(e);
   }
-  
+
   setTimeout(notifyCadenceCSP, 60 * 1000/(Math.random() * randomness + cadence));
 };
 
