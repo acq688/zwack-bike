@@ -79,6 +79,13 @@ The ZwackBLE sensor may show up as `Zwack` or has the hostname of the machine ru
 
 Press `x` or `q` to exit Zwack.
 
+# Donations
+If you like this project, please consider doing the following:
+* Starring on GitHub
+* [Buying me a coffee](https://www.buymeacoffee.com/iaroslav)
+
+[![BuyMeACoffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/iaroslav)
+
 # Credits
 
 Initial prototype based on [zwack](https://github.com/paixaop/zwack) code from [paixaop](https://github.com/paixaop).
