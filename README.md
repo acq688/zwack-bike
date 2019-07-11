@@ -8,8 +8,7 @@ Zwack Bike has many possible uses, here are some examples:
   * Integrate a common treadmill with Zwift, sending data from the treadmill to the Zwift game via Bluetooth
 
 As an example, the code in this project is used to integrate with [Peloton Bike Metrics Server](https://github.com/iaroslavn/peloton-bike-metrics-server) to allow Peloton Bike owners to take rides on Zwift.  
-Diagram of the project:
-
+Diagram of the project:  
 ![Diagram of the project](./img/peloton-bike-zwift-diagram.png)
 
 # Supports
