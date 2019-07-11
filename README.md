@@ -1,38 +1,46 @@
-# Zwack BLE
+# Zwack Bike BLE
 
-Simulate/Implement a Bluetooth Low Energy sensor that can send:
+Simulate/Implement a Bluetooth Low Energy sensor that can send Cycling Power and Cadence (CSP Bluetooth profile).
 
-  * Cycling Power and Cadence (CSP Bluetooth profile)
-  * Running Speed and Cadence (RSC Bluetooth profile)
+Zwack Bike has many possible uses, here are some examples:
 
-Zwack has many possible uses, here are some examples:
+  * Simulate an indoor bike trainer (turbo) generating cyclist power and cadence data to test bike computers fitness or virtual indoor bike apps. 
+  * Integrate a common treadmill with Zwift, sending data from the treadmill to the Zwift game via Bluetooth
 
-  * Simulate an indoor bike trainer (turbo) generating cyclist power and cadence data to test bike computers fitness, or virtual indoor bike apps. 
-  * Simulate a runner's speed and pace test bike computers fitness, or virtual indoor bike apps. 
-  * Integrate a common treadmill with Zwift, sending data from the treadmill to the Zwift game via bluetooth
+As an example, the code in this project is used to integrate with [Peloton Bike Metrics Server](https://github.com/iaroslavn/peloton-bike-metrics-server) to allow Peloton Bike owners to take rides on Zwift.  
+Diagram of the project:  
+![Diagram of the project](./img/peloton-bike-zwift-diagram.png)
 
 # Supports
 
-At this time Zwack runs succesfuly on Mac OSX and Raspberry PI. Should run on Windows but it hasn't been tested. If it works let me know.
+At this time Zwack runs successfully on Raspberry PI with Bluetooth module (tested on [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)).
+
+# Requirements
+  * Raspberry Pi (theoretically should run in all Bleno (the base BLE module) supported platforms, which are Mac, Windows or Raspberry Pi.)
+  * Node.js v8.x (The library we use to communicate over Bluetooth doesn't work with the latest versions of Node.js yet.)
+ 
+Zwack cannot run on the same computer as the fitness or virtual indoor bike app, you'll need to run them on different systems.
 
 # Installation
 
-Install from npm
+Make sure you have Node.js **v8.x** installed.
 
-    npm i zwack
+On Raspberry Pi it can be installed like this:
+    
+    curl -sL https://deb.nodesource.com/setup_8.x|sudo -E bash -
+    sudo apt-get update
+    sudo apt-get install -y nodejs
+    sudo apt-get install -y build-essential
 
-or clone this repo and run 
+Clone this repo and run 
 
     npm install
-
-You may need to install Xcode on Mac to compile the `bleno` Bluetooth module. 
 
 # Debug Flags
 
 You can see a lot of debug information if you run the simulator or your app with the DEBUG environment variable set to 
 
   * csp - Cycling Power and Cadence messages
-  * rsc - Running Speed and Cadence messages
   * ble - Bluetooth low energy messages
 
 Example:
@@ -41,50 +49,36 @@ Example:
 
 You'll see something similar to this
 
-```
-rsc [Zwack notifyRSC] {"speed":4.4703888888888885,"cadence":180} +0ms
-rsc Running Speed: 4.4703888888888885 +2ms
-rsc Running Cadence: 180 +0ms
-rsc [Zwack notifyRSC] {"speed":4.4703888888888885,"cadence":180} +1s
-rsc Running Speed: 4.4703888888888885 +0ms
-```
+    rsc [Zwack notifyRSC] {"speed":4.4703888888888885,"cadence":180} +0ms
+    rsc Running Speed: 4.4703888888888885 +2ms
+    rsc Running Cadence: 180 +0ms
+    rsc [Zwack notifyRSC] {"speed":4.4703888888888885,"cadence":180} +1s
+    rsc Running Speed: 4.4703888888888885 +0ms
 
 # Using the simulator
 
+This simulator requires a connection to the Metrics server (can be any HTTP endpoint) that returns metrics as a JSON document:
+
+    {"cadence": 85, "power": 102}
+
+*NOTE: If you wish to use a standalone simulator please have a look at [zwack](https://github.com/paixaop/zwack).*
+
 Start the simulator by executing:
 
-    npm run simulator
+    npm run simulator -- --server=http://<YOUR METRICS SERVER URL>
 
-On a different machine start your fitness app, bike computer or indoor virtual bike simulation software, like Zwift, and pair up the Zwack BLE sensor. The sensor name should be `Zwack`, it may have some numbers added to the name or you may see the host name of the computer running zwack. It all depends on the operating system you're uing to run Zwack.
+E.g.:
+
+    npm run simulator -- --server=http://192.168.1.213:5000/metrics
+
+On a different machine start your fitness app, bike computer or indoor virtual bike simulation software, like Zwift, and pair up the Zwack BLE sensor. The sensor name should be `Zwack`, it may have some numbers added to the name or you may see the hostname of the computer running zwack. It all depends on the operating system you're uing to run Zwack.
 
 If your indoor biking software does not detect the BLE sensor, disable, then enable, the Bluetooth on the machine where Zwack is running and retry to discover and connect to the sensor again.
 
-The ZwackBLE sensor may show up as `Zwack` or has the host name of the machine running Zwack. This is normal.
-
-Updating simulation parameters
-
-    List of Available Keys
-      c/C - Decrease/Increase cadence
-      p/P - Decrease/Increase power
-      s/S - Decrease/Increase running speed
-      d/D - Decrease/Increase running cadence  
-
-      r/R - Decrease/Increase parameter variability
-      i/I - Decrease/Increase parameter increment
-      x/q - Exit
-
-Pressing `c` on your keyboard will decrease the cadence, conversly pressing `C` (upper case) will increase simulated cadence. Same thing for power by pressing `p` or `P`.
- 
-The variability parameter will introduce some random variability to the cadence and power values, so they don't remain constant all the time. If you lower the variability to `0` the cadence and power values will remain constant.
+The ZwackBLE sensor may show up as `Zwack` or has the hostname of the machine running Zwack. This is normal.
 
 Press `x` or `q` to exit Zwack.
 
-# Requirements
+# Credits
 
-Requires NodeJS, and should run in all Bleno (the base BLE module) supported platforms, which are Mac, Windows or Raspberry Pi. 
-
-Zwack cannot run on the same computer as the fitness or virtual indoor bike app, you'll need to run them on different systems.
-
-## Credits
-
-Initial prototype based on [ble-cycling-power](https://github.com/olympum/ble-cycling-power) code from olympum.
+Initial prototype based on [zwack](https://github.com/paixaop/zwack) code from [paixaop](https://github.com/paixaop).
