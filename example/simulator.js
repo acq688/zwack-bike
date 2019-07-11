@@ -4,13 +4,10 @@ const readline = require('readline');
 // default parameters
 var cadence = 90;
 var power = 250;
-var runningCadence = 180;
-var runningSpeed = 10;  // 6:00 minute mile
 var randomness = 5;
 var sensorName = 'Zwack';
 
 var incr = 10;
-var runningIncr = 0.5;
 var stroke_count = 0;
 var notificationInterval = 1000;
 var watts = power;
@@ -32,11 +29,9 @@ process.stdin.on('keypress', (str, key) => {
   } else {
     if( key.shift ) {
       factor = incr;
-      runFactor = runningIncr;
     }
     else {
       factor = -incr;
-      runFactor = -runningIncr;
     }
 
     switch(key.name) {
@@ -60,16 +55,6 @@ process.stdin.on('keypress', (str, key) => {
         randomness += factor; break;
         if( randomness < 0 ) {
           randomness = 0;
-        }
-      case 's':
-        runningSpeed += runFactor; break;
-        if( runningSpeed < 0 ) {
-          runningSpeed = 0;
-        }
-      case 'd':
-        runningCadence += runFactor; break;
-        if( runningCadence < 0 ) {
-          runningCadence = 0;
         }
       case 'i':
         incr += Math.abs(factor)/factor; break;
@@ -115,30 +100,11 @@ var notifyCadenceCSP = function() {
 };
 
 
-var notifyRSC = function() {
-  try {
-    zwackBLE.notifyRSC({
-      'speed': toMs(Math.random() + runningSpeed),
-      'cadence': Math.floor(Math.random() * 2 + runningCadence)
-    });
-  }
-  catch( e ) {
-    console.error(e);
-  }
-  
-  setTimeout(notifyRSC, notificationInterval);
-};
-
 function listParams() {
   console.log(`\nBLE Sensor parameters:`);
   console.log(`\nCycling:`)
   console.log(`    Cadence: ${cadence} RPM`);
   console.log(`    Power: ${power} W`);
-
-  console.log('\nRunning:');
-
-  console.log(`    Speed: ${runningSpeed} m/h, Pace: ${speedToPace(runningSpeed)} min/mi`);
-  console.log(`    Cadence: ${Math.floor(runningCadence)} steps/min`);
 
   console.log(`\nRandomness: ${randomness}`);
   console.log(`Increment: ${incr}`);
@@ -150,27 +116,10 @@ function listKeys() {
   console.log('c/C - Decrease/Increase cycling cadence');
   console.log('p/P - Decrease/Increase cycling power');
 
-  console.log('s/S - Decrease/Increase running speed');
-  console.log('d/D - Decrease/Increase running cadence');
-
   console.log('\nr/R - Decrease/Increase parameter variability');
   console.log('i/I - Decrease/Increase parameter increment');
   console.log('x/q - Exit');
   console.log();
-}
-
-function speedToPace(speed) {
-  if( speed === 0 ) {
-    return '00:00';
-  }
-  let t = 60 / speed;
-  let minutes = Math.floor(t);
-  let seconds = Math.floor((t - minutes) * 60);
-  return minutes.toString().padStart(2,'0') + ':' + seconds.toString().padStart(2,'0');
-}
-
-function toMs(speed) {
-  return (speed * 1.60934) / 3.6;
 }
 
 // Main
@@ -180,4 +129,3 @@ listKeys();
 listParams();
 notifyPowerCSP();
 notifyCadenceCSP();
-notifyRSC();
