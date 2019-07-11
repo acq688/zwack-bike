@@ -1,15 +1,23 @@
 var ZwackBLE = require('../lib/zwack-ble-sensor');
 const readline = require('readline');
+const http = require('http');
+
+var argv = require('minimist')(process.argv.slice(2));
+var metricsServerUrl = argv.server;
+if (metricsServerUrl === undefined){
+  console.log("Error: server parameter is required");
+  process.exit(1);
+}
 
 // default parameters
 var cadence = 90;
 var power = 250;
-var randomness = 5;
+var randomness = 0;
 var sensorName = 'Zwack';
 
 var incr = 10;
 var stroke_count = 0;
-var notificationInterval = 1000;
+var notificationInterval = 700;
 var watts = power;
 
 readline.emitKeypressEvents(process.stdin);
@@ -122,6 +130,27 @@ function listKeys() {
   console.log();
 }
 
+function pollMetricsFromServer() {
+  http.get(metricsServerUrl, function(res){
+    var body = '';
+
+    res.on('data', function(chunk){
+        body += chunk;
+    });
+
+    res.on('end', function(){
+        var response = JSON.parse(body);
+        console.log("Got a response:", "power:", response.power, "cadence:", response.cadence);
+        cadence = response.cadence;
+        power = response.power;
+    });
+  }).on('error', function(e){
+    console.log("Got an error: ", e);
+  });
+
+  setTimeout(pollMetricsFromServer, notificationInterval);
+}
+
 // Main
 console.log(`[ZWack] Faking test data for sensor: ${sensorName}`);
 
@@ -129,3 +158,4 @@ listKeys();
 listParams();
 notifyPowerCSP();
 notifyCadenceCSP();
+pollMetricsFromServer();
