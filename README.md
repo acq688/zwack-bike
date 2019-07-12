@@ -45,7 +45,7 @@ You can see a lot of debug information if you run the simulator or your app with
 
 Example:
 
-    DEBUG=rsc npm run simulator
+    sudo DEBUG=rsc npm run simulator -- --server=http://<YOUR METRICS SERVER URL>
 
 You'll see something similar to this
 
@@ -63,13 +63,13 @@ This simulator requires a connection to the Metrics server (can be any HTTP endp
 
 *NOTE: If you wish to use a standalone simulator please have a look at [zwack](https://github.com/paixaop/zwack).*
 
-Start the simulator by executing:
+Start the simulator by executing (note: sudo is required for BLE sensor emulation to work):
 
-    npm run simulator -- --server=http://<YOUR METRICS SERVER URL>
+    sudo npm run simulator -- --server=http://<YOUR METRICS SERVER URL>
 
 E.g.:
 
-    npm run simulator -- --server=http://192.168.1.213:5000/metrics
+    sudo npm run simulator -- --server=http://192.168.1.213:5000/metrics
 
 On a different machine start your fitness app, bike computer or indoor virtual bike simulation software, like Zwift, and pair up the Zwack BLE sensor. The sensor name should be `Zwack`, it may have some numbers added to the name or you may see the hostname of the computer running zwack. It all depends on the operating system you're uing to run Zwack.
 
